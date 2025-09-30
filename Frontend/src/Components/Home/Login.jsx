@@ -20,7 +20,7 @@ function Login() {
           console.log("Login success:", res.data);
           alert("Login successful!");
           setIsAuthenticated(true);
-          navigate("/dashboard");
+          navigate("/");
 
         } catch (error) {
 

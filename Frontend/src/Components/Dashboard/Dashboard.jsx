@@ -4,9 +4,8 @@ import Navbar from "../Navbar";
 import { useNavigate} from "react-router-dom";
 import { client } from "../../api/auth";
 
-const Dashboard = ({ user, onLogout }) => {
+const Dashboard = ({ user, onLogout}) => {
   const navigate = useNavigate();
-
   useEffect(() => {
     const fetchClient = async () => {
       try {
