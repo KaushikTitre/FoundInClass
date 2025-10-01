@@ -10,6 +10,7 @@ app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
+const Port = process.env.Port;
 
 
 app.get('/',(req,res)=>{
@@ -20,8 +21,8 @@ app.get('/',(req,res)=>{
 app.use("/api/auth", authRoutes);
 
 connectDB().then(()=>{
-    app.listen(4000, () => {
-        console.log("Server running on port 4000")});
+    app.listen(Port, () => {
+        console.log(`Server running on port ${Port}`)});
     });
 
 
