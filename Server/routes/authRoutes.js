@@ -11,5 +11,4 @@ router.post("/logout", logout);
 router.get("/client", verifyToken, (req, res) => {
   res.json({ message: `Hello User ${req.user.id}` });
 });
-
 export default router;

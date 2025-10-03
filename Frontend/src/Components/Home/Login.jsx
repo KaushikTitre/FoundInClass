@@ -19,6 +19,10 @@ function Login() {
           const res = await login(data.email, data.password); // save response
           console.log("Login success:", res.data);
           alert("Login successful!");
+              // Save token (for Bearer-based requests)
+    if (res.data.token) {
+      localStorage.setItem("token", res.data.token);
+    }
           setIsAuthenticated(true);
           navigate("/");
 

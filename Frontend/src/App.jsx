@@ -4,6 +4,7 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+
 import About from './Components/About/About';
 import NotFound from './Components/NotFound';
 import PostLost from './Components/PostLostIteams/PostLost';
@@ -12,6 +13,7 @@ import Login from './Components/Home/Login';
 import Dashboard from './Components/Dashboard/dashboard';
 import Signup from './Components/Home/Signup';
 import { AuthStatus } from './Components/context';
+import PrivateRoute from './Components/PrivateRoute';
 
 
 const router = createBrowserRouter(
@@ -24,11 +26,19 @@ const router = createBrowserRouter(
 },
 {
   path:"/PostLost",
-  element:<PostLost />
+  element:(
+    <PrivateRoute>
+      <PostLost />
+    </PrivateRoute>
+  )
 },
 {
-  path:"/PostFound",
-  element:<PostFound />
+  path: "/PostFound",
+    element: (
+      <PrivateRoute>
+        <PostFound />
+      </PrivateRoute>
+    )
 },
 {
   path:"/login",
@@ -40,7 +50,11 @@ const router = createBrowserRouter(
 },
 {
   path:"/dashboard",
-  element:<Dashboard />
+  element:(
+  <PrivateRoute>
+  <Dashboard />
+  </PrivateRoute>
+  )
 },
 
 {
@@ -50,7 +64,9 @@ const router = createBrowserRouter(
   ]
 )
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem("token"); // true if token exists
+  });
   return (
     <AuthStatus.Provider value={{ isAuthenticated, setIsAuthenticated }}>
     <div>

@@ -10,22 +10,21 @@ function Navbar() {
 
   const navigate = useNavigate();
   async function handleClick() {
-   if(!isAuthenticated){
-    navigate("/login");
-   }
-   else{
-    try {
-      await logout();
-      alert("Logged out");
-      setIsAuthenticated(false);  // <- update context
-      navigate("/login");         // optional redirect
-    } catch(err) {
-      console.error("Logout failed", err);
+    if (!isAuthenticated) {
+      navigate("/login");
+    } else {
+      try {
+        await logout();                 
+        localStorage.removeItem("token"); 
+        setIsAuthenticated(false);      
+        navigate("/login");
+        alert("Logged out successfully!");
+      } catch (err) {
+        console.error("Logout failed", err);
+      }
     }
-   }
-    setTimeout(() => {
-    }, 5);
-  }  
+  }
+   
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 0) {

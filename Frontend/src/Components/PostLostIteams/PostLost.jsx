@@ -1,7 +1,8 @@
-import { useState , useEffect   } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Upload, X } from "lucide-react";
 import { client } from '../../api/auth';
+import { Lost } from '../../api/post';
 
 export default function PostLost() {
   const navigate = useNavigate();
@@ -12,22 +13,25 @@ export default function PostLost() {
         await client();
       } catch (error) {
         console.error("Error fetching client:", error);
-        navigate("/login"); // redirect if unauthorized
+        navigate("/login");
       }
     };
     fetchClient();
   }, [navigate]);
 
-
   const [formData, setFormData] = useState({
     itemName: '',
     category: '',
     description: '',
+    verificationHint: '',
     dateLost: '',
     timeLost: '',
     timePeriod: '',
     location: '',
   });
+  
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [customCategoryValue, setCustomCategoryValue] = useState('');
   
   const [errors, setErrors] = useState({});
   const [imageFile, setImageFile] = useState(null);
@@ -36,9 +40,31 @@ export default function PostLost() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (name === 'category') {
+      if (value === 'Other') {
+        setShowCustomCategory(true);
+        setFormData(prev => ({ ...prev, [name]: '' }));
+      } else {
+        setShowCustomCategory(false);
+        setCustomCategoryValue('');
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+    
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleCustomCategoryChange = (e) => {
+    const value = e.target.value;
+    setCustomCategoryValue(value);
+    setFormData(prev => ({ ...prev, category: value }));
+    if (errors.category) {
+      setErrors(prev => ({ ...prev, category: '' }));
     }
   };
 
@@ -51,6 +77,9 @@ export default function PostLost() {
         setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
+      if (errors.image) {
+        setErrors(prev => ({ ...prev, image: '' }));
+      }
     }
   };
 
@@ -66,12 +95,16 @@ export default function PostLost() {
       newErrors.itemName = 'Item name is required';
     }
     
-    if (!formData.category) {
-      newErrors.category = 'Please select a category';
+    if (!formData.category || !formData.category.trim()) {
+      newErrors.category = 'Category is required';
     }
     
     if (!formData.description.trim()) {
       newErrors.description = 'Description is required';
+    }
+    
+    if (!formData.verificationHint.trim()) {
+      newErrors.verificationHint = 'Verification hint is required';
     }
     
     if (!formData.dateLost) {
@@ -90,46 +123,55 @@ export default function PostLost() {
       newErrors.location = 'Location is required';
     }
     
+    if (!imageFile) {
+      newErrors.image = 'Image is required';
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) {
-      return;
-    }
-    
+    if (!validateForm()) return;
     setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     const submissionData = {
-      ...formData,
-      image: imageFile ? {
-        name: imageFile.name,
-        size: imageFile.size,
-        type: imageFile.type
-      } : null
+      lItemName: formData.itemName,
+      lCategory: formData.category,
+      lDescription: formData.description,
+      lverificationHint: formData.verificationHint,
+      lDateLost: formData.dateLost,
+      lApproxTime: `${formData.timeLost} ${formData.timePeriod}`,
+      lLocation: formData.location,
+      lImage: imageFile ? imageFile.name : null,
     };
-    
-    console.log('Form Submitted:', submissionData);
-    
-    setIsSubmitting(false);
-    alert('Lost item report submitted successfully!');
-    
-    // Reset form
-    setFormData({
-      itemName: '',
-      category: '',
-      description: '',
-      dateLost: '',
-      timeLost: '',
-      timePeriod: '',
-      location: '',
-    });
-    setImageFile(null);
-    setImagePreview(null);
+
+    try {
+      const res = await Lost(submissionData);
+      console.log('Form Submitted:', res.data);
+      alert('Lost item report submitted successfully!');
+
+      setFormData({
+        itemName: '',
+        category: '',
+        description: '',
+        verificationHint: '',
+        dateLost: '',
+        timeLost: '',
+        timePeriod: '',
+        location: '',
+      });
+      setImageFile(null);
+      setImagePreview(null);
+      setShowCustomCategory(false);
+      setCustomCategoryValue('');
+
+    } catch (error) {
+      console.error("Error submitting lost item:", error);
+      alert("Error submitting lost item. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -172,7 +214,7 @@ export default function PostLost() {
               </label>
               <select
                 name="category"
-                value={formData.category}
+                value={showCustomCategory ? 'Other' : formData.category}
                 onChange={handleInputChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
                   errors.category ? 'border-red-500' : 'border-gray-300'
@@ -185,10 +227,32 @@ export default function PostLost() {
                 <option value="Bag">Bag</option>
                 <option value="Other">Other</option>
               </select>
-              {errors.category && (
+              {errors.category && !showCustomCategory && (
                 <div className="mt-1 flex items-center text-red-500 text-sm">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.category}
+                </div>
+              )}
+              
+              {/* Custom Category Input - Shows when "Other" is selected */}
+              {showCustomCategory && (
+                <div className="mt-3">
+                  <input
+                    type="text"
+                    name="customCategory"
+                    value={customCategoryValue}
+                    onChange={handleCustomCategoryChange}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                      errors.category ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="Please specify the category"
+                  />
+                  {errors.category && (
+                    <div className="mt-1 flex items-center text-red-500 text-sm">
+                      <AlertCircle className="w-4 h-4 mr-1" />
+                      {errors.category}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -212,6 +276,32 @@ export default function PostLost() {
                 <div className="mt-1 flex items-center text-red-500 text-sm">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.description}
+                </div>
+              )}
+            </div>
+
+            {/* Verification Hint - NEW FIELD */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Verification Hint <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                name="verificationHint"
+                value={formData.verificationHint}
+                onChange={handleInputChange}
+                rows={3}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none ${
+                  errors.verificationHint ? 'border-red-500' : 'border-gray-300'
+                }`}
+                placeholder="Add details to help verify if someone found your item. E.g., 'What color was the wallet interior?' or 'What stickers are on the phone case?'"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                This hint will help verify if someone has found your item. Include specific details only you would know.
+              </p>
+              {errors.verificationHint && (
+                <div className="mt-1 flex items-center text-red-500 text-sm">
+                  <AlertCircle className="w-4 h-4 mr-1" />
+                  {errors.verificationHint}
                 </div>
               )}
             </div>
@@ -308,25 +398,35 @@ export default function PostLost() {
               )}
             </div>
 
-            {/* Image Upload */}
+            {/* Image Upload - Now Required */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Upload Image (Optional)
+                Upload Image <span className="text-red-500">*</span>
               </label>
               
               {!imagePreview ? (
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition">
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="w-8 h-8 mb-2 text-gray-400" />
-                    <p className="text-sm text-gray-500">Click to upload image</p>
-                  </div>
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                  />
-                </label>
+                <div>
+                  <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition ${
+                    errors.image ? 'border-red-500' : 'border-gray-300'
+                  }`}>
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                      <p className="text-sm text-gray-500">Click to upload image</p>
+                    </div>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                    />
+                  </label>
+                  {errors.image && (
+                    <div className="mt-1 flex items-center text-red-500 text-sm">
+                      <AlertCircle className="w-4 h-4 mr-1" />
+                      {errors.image}
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="relative">
                   <img

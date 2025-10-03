@@ -36,10 +36,25 @@ export const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Incorrect password" });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    // NOTE: use _id (not id) and include email if you want
+    const token = jwt.sign(
+      { _id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
-    res.cookie("token", token, { httpOnly: true }).json({ message: "Logged in" });
+    // Set cookie (optional) — helpful for cookie-based auth
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,    // set true in production with HTTPS
+      sameSite: "lax",  // if frontend is different origin, consider 'none' + secure:true (production)
+      maxAge: 1000 * 60 * 60 // 1 hour
+    });
+
+    // ALSO return token in response body (so front-end can use Bearer fallback)
+    return res.json({ message: "Logged in", token, user: { _id: user._id, email: user.email } });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };

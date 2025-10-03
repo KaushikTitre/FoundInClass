@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import 'dotenv/config';
 import connectDB from "./config/mongoDB.js";
 import authRoutes from "./routes/authRoutes.js"
+import postRoutes from "./routes/postRoutes.js"
 
 const app = express();
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
@@ -19,6 +20,7 @@ app.get('/',(req,res)=>{
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/post",postRoutes);
 
 connectDB().then(()=>{
     app.listen(Port, () => {
