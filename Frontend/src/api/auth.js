@@ -1,7 +1,13 @@
 // src/api/auth.js
 import axios from "axios";
 
-const API_URL = "http://localhost:4000/api/auth";
+const API_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:4000/api/auth"
+    : "https://foundinclass-production.up.railway.app/api/auth";
+
+
+// const API_URL = "http://localhost:4000/api/auth";
 
 axios.defaults.withCredentials = true;
 

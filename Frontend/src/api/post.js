@@ -1,5 +1,10 @@
 import axios from "axios";
-const API_URL = "http://localhost:4000/api/post";
+// const API_URL = "http://localhost:4000/api/post";
+const API_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:4000/api/post"
+    : "https://foundinclass-production.up.railway.app/api/post";
+
 
 axios.defaults.withCredentials = true;
 
