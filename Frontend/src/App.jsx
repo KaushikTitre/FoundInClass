@@ -10,7 +10,7 @@ import NotFound from './Components/NotFound';
 import PostLost from './Components/PostLostIteams/PostLost';
 import PostFound from './Components/PostFound/PostFound';
 import Login from './Components/Home/Login';
-import Dashboard from './Components/Dashboard/dashboard';
+import Dashboard from './Components/Dashboard/Dashboard';
 import Signup from './Components/Home/Signup';
 import { AuthStatus } from './Components/context';
 import PrivateRoute from './Components/PrivateRoute';
