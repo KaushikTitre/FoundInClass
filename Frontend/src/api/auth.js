@@ -22,4 +22,4 @@ export const logout = async () => {
 
 export const client = async () =>{
   return await axios.get(`${API_URL}/client`);
-}
+};

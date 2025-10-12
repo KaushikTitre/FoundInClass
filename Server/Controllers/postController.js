@@ -1,5 +1,6 @@
 import PostLost from "../Models/postLostSchema.js";
 import PostFound from "../Models/postFoundSchema.js";
+import { matchFoundItem} from "./foundController.js";
 
 
 export const LostIteam = async (req, res) => {
@@ -21,7 +22,7 @@ export const LostIteam = async (req, res) => {
 
     // save to MongoDB
     await lostItem.save();
-  
+
     res.status(201).json({ message: "Lost item saved successfully", data: lostItem });
   } catch (err) {
     console.error("Error saving lost item:", err);
@@ -55,9 +56,22 @@ export const FoundIteam = async (req , res) =>{
 
     // save to MongoDB
     await FoundIteam.save();
+    // res.status(201).json({ message: "Found item saved successfully", data: FoundIteam});
 
-    res.status(201).json({ message: "Found item saved successfully", data: FoundIteam});
+     // ✅ Run automatic matching
+     const matchResult = await matchFoundItem(FoundIteam);
 
+     if (matchResult) {
+       res.status(201).json({
+         message: " Found item saved successfully match found!",
+         data: matchResult
+       });
+     } else {
+       res.status(201).json({
+         message: "Found item saved successfully No match yet.",
+         data: FoundIteam
+       });
+     }
   } catch (error) {
     console.error("Error saving found item:", error);
     res.status(500).json({ error: "Failed to save found item" });

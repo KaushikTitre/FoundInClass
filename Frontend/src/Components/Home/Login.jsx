@@ -69,7 +69,7 @@ function Login() {
             <input
                    {...register("password", {
                     required: "Password is required",
-                    maxLength:{value:8,message:'Enter maximum 8 char'}
+                    minLength:{value:6,message:'Enter minimum 6 char'}
                   })}
               type="password"
               placeholder="Enter your password"

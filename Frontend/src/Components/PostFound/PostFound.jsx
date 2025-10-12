@@ -166,6 +166,7 @@ export default function PostFound() {
       setCustomCategoryValue('');
       setImageFile(null);
       setImagePreview(null);
+      navigate("/dashboard");
 
     } catch (error) {
       console.error("Error submitting found item:", error);

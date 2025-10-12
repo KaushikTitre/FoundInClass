@@ -10,7 +10,8 @@ const PostLostSchema = new mongoose.Schema({
     lLocation: {type: String , required : true}, 
     lImage: { type: String, required: false },     
     postedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    status: { type: String, enum: ['open','matched','resolved'], default: 'open' },
+    status: { type: String, enum: ['open','matched','verified','Payment','Location_Released','Collect'], default: 'open' },
+    type: {type:String , default:'lost'},
   });
   
 const PostLost = mongoose.model("PostLost", PostLostSchema);

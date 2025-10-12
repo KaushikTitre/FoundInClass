@@ -10,7 +10,8 @@ const PostFoundSchema = new mongoose.Schema({
     fLocation: {type: String , required : true},  
     fImage: { type: String, required: true }, 
     postedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    status: { type: String, enum: ['open','claimed','returned'], default: 'open' },
+    status: { type: String, enum: ['open','matched','verified','Location_Released','GetPayment','handover'], default: 'open' },
+    type: {type:String , default:'found'},
   });
   
  const PostFound = mongoose.model("PostFound", PostFoundSchema);

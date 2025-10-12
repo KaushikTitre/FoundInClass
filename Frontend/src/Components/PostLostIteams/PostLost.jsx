@@ -123,10 +123,6 @@ export default function PostLost() {
       newErrors.location = 'Location is required';
     }
     
-    if (!imageFile) {
-      newErrors.image = 'Image is required';
-    }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -165,7 +161,7 @@ export default function PostLost() {
       setImagePreview(null);
       setShowCustomCategory(false);
       setCustomCategoryValue('');
-
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error submitting lost item:", error);
       alert("Error submitting lost item. Please try again.");
@@ -401,7 +397,7 @@ export default function PostLost() {
             {/* Image Upload - Now Required */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Upload Image <span className="text-red-500">*</span>
+                Upload Image <span className="text-red-500"></span>
               </label>
               
               {!imagePreview ? (
