@@ -7,8 +7,24 @@ import authRoutes from "./routes/authRoutes.js"
 import postRoutes from "./routes/postRoutes.js"
 import userRoutes from "./routes/userRoutes.js"
 
+const allowedOrigins = [
+    "http://localhost:5173", // your local frontend
+    "https://found-in-class.vercel.app"
+];
 const app = express();
-app.use(cors({ origin: "https://found-in-class.vercel.app", credentials: true }));
+app.use(cors({
+    origin: function(origin, callback){
+        // allow requests with no origin (like Postman)
+        if(!origin) return callback(null, true);
+        if(allowedOrigins.indexOf(origin) !== -1){
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true
+}));
+
 app.use(express.json());
 app.use(cookieParser());
 
