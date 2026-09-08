@@ -13,7 +13,7 @@ export function getMatchScore(lost, found) {
     lost.lDescription.toLowerCase(),
     found.fDescription.toLowerCase()
   );
-  score += descScore * 40;
+  score += descScore * 20;
 
   const hintScore = stringSimilarity.compareTwoStrings(
     lost.lverificationHint.toLowerCase(),
@@ -25,7 +25,7 @@ export function getMatchScore(lost, found) {
     lost.lLocation.toLowerCase(),
     found.fLocation.toLowerCase()
   );
-  score += locScore * 10;
+  score += locScore * 30;
 
   console.log("Scores => Name:", nameScore, "Desc:", descScore, "Hint:", hintScore, "Loc:", locScore, "Total:", score);
 
